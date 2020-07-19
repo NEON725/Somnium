@@ -326,9 +326,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1327846859}
   serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 10
-  m_AngularDrag: 1
+  m_Mass: 10
+  m_Drag: 0
+  m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -346,9 +346,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0014a14da8a7212f84d2d626df12efb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 30
-  rotateSpeed: 5
-  jumpForce: 0
+  moveSpeed: 12
+  rotateSpeed: 12
+  jumpForce: 15
 --- !u!136 &1327846862
 CapsuleCollider:
   m_ObjectHideFlags: 0
