@@ -10,6 +10,12 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+# Automatically-built library files.
+UnityPlayer.so
+UnityPlayer_s.debug
+LinuxPlayer_s.debug
+SomniumClient*
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
@@ -80,3 +86,6 @@ crashlytics-build.properties
 
 # Local History for Visual Studio Code
 .history/
+
+# Nano lockfile
+**.swp

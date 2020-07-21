@@ -49,6 +49,14 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Free Mouse"",
+                    ""type"": ""Button"",
+                    ""id"": ""d4ff0e1b-a400-403e-803a-d4906028379b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -291,6 +299,17 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7f6614fd-4717-414a-bc92-51743a00aeba"",
+                    ""path"": ""<Keyboard>/leftAlt"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Free Mouse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -872,6 +891,7 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_FreeMouse = m_Player.FindAction("Free Mouse", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -937,6 +957,7 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Fire;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_FreeMouse;
     public struct PlayerActions
     {
         private @DefaultPlayerInputs m_Wrapper;
@@ -945,6 +966,7 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @FreeMouse => m_Wrapper.m_Player_FreeMouse;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -966,6 +988,9 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @FreeMouse.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFreeMouse;
+                @FreeMouse.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFreeMouse;
+                @FreeMouse.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFreeMouse;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -982,6 +1007,9 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @FreeMouse.started += instance.OnFreeMouse;
+                @FreeMouse.performed += instance.OnFreeMouse;
+                @FreeMouse.canceled += instance.OnFreeMouse;
             }
         }
     }
@@ -1142,6 +1170,7 @@ public class @DefaultPlayerInputs : IInputActionCollection, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnFreeMouse(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
