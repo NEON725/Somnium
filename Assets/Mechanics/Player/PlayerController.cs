@@ -29,7 +29,7 @@ public class LocalPlayerController:JobComponentSystem
 {
 	public float lookSpeed=0.02f;
 	public float moveSpeed=0.25f;
-	public float jumpForce=3;
+	public float jumpForce=8;
 	public float cameraFollowDistance=8;
 
 	private float3 worldForward=new float3(0,0,1);
