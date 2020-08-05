@@ -24,7 +24,6 @@ public class MouseLookAccumulatorSystem:JobComponentSystem
 	}
 }
 
-//[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 public class LocalPlayerController:JobComponentSystem
 {
 	public float lookSpeed=0.02f;
@@ -43,8 +42,7 @@ public class LocalPlayerController:JobComponentSystem
 	{
 		input.Enable();
 		/*
-		* The "Freeze Constraints" property does not survive entity authoring.
-		* Instead, the effect is replicated by giving it infin
+		* Rotation is locked by setting inertia to infinite.
 		*/
 		Entities
 			.WithoutBurst()
