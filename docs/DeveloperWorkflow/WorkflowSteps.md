@@ -16,6 +16,7 @@
 * During epic planning, an epic will be created for the upcoming release, and several tickets will be created, or promoted from the Backlog to the new epic.
 * A developer can claim any ticket that is part of the current epic, or a bugfix ticket.
 	* Move the ticket to the "In Progress" category on the Kanban board.
+	* Assign the ticket to the current epic if it was not already.
 	* If the ticket relates to a code change:
 	* Create a feature branch with the same ID as the ticket. (E.G. MMO-12)
 	* Develop using this feature branch.
