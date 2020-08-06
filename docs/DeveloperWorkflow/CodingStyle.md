@@ -1,4 +1,4 @@
-[Go Up](../)
+[Go Up](./)
 
 # Indentation and Spacing
 * Tabs are to be used instead of spaces.
