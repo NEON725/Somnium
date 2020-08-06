@@ -1,6 +1,6 @@
 [Go Up](./)
 
-#Jira Steps
+# Jira Steps
 * Newly-created tickets should be created as "Backlog" tickets, in the Backlog section of Jira.
 	* Epic: Assign to Backlog epic, as this is not done automatically.
 	* Issue Type:
