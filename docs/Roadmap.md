@@ -16,7 +16,7 @@ Code should implement the entity-component-system (ECS) pattern and update the p
 
 Project should implement multiplayer by means of a client-server model. [MMO-22](https://neon725.atlassian.net/jira/software/projects/MMO/issues/MMO-22)
 
-Project should expand multiplayer to feature multiple "shards" that are responsible for different regions of the game world. [MMO-23](https://neon725.atlassian.net/jira/software/projects/MMO/issues/MMO-23)
+Project should expand multiplayer to feature multiple "shards" that are responsible for different regions of the game world. Clients can render and participate in both shards simultaneously as if they were on one server. [MMO-23](https://neon725.atlassian.net/jira/software/projects/MMO/issues/MMO-23)
 
 Game should feature two zones controlled by different shard servers, one of which features basic enemies, and the other being a safe area.
 
