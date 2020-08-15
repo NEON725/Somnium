@@ -1,4 +1,8 @@
 {
 	"editor.detectIndentation": false,
-	"editor.insertSpaces": false
+	"editor.insertSpaces": false,
+	"files.watcherExclude": {
+		"**/Library/**": true,
+		"**/Temp/**": true
+	}
 }
