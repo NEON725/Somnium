@@ -1,7 +1,6 @@
-﻿using Unity.Entities;
-using Unity.Mathematics;
+using Unity.Entities;
 
 public struct LocalPlayer:IComponentData
 {
-	public float2 accumulatedMouseLook;
+	public float followCameraPitch;
 }
