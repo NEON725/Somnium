@@ -1,83 +1,92 @@
+using System;
 using Unity.Core;
 using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class FrameGovernor:ComponentSystem
 {
 	public const double FULL_FRAME_INTERVAL=0.03125;
+	public const double MAXIMUM_SUBFRAME_DEVIATION_PERCENT=0.25;
 
 	protected TakeSimulationSnapshotSystem snapshotSystem;
-	protected double lastSubFrame;
+	protected InputAccumulatorSystem inputAccumulatorSystem;
+	protected double lastSubFrame=0;
+	protected double lastReceivedServerFrame=0;
+	protected double userVisibleWorldElapsed=0;
+	protected double serverFrameLead=0;
+	protected bool slavedToRemoteGovernor=false;
+	protected bool createdInputSingleton=false;
 
 	protected override void OnUpdate()
 	{
 		var simulationGroup=World.GetExistingSystem<SimulationSystemGroup>();
-		var lateSimulationGroup=World.GetExistingSystem<LateSimulationSystemGroup>();
-
-		snapshotSystem=World.GetOrCreateSystem<TakeSimulationSnapshotSystem>();
-		lateSimulationGroup.AddSystemToUpdateList(snapshotSystem);
-		simulationGroup.RemoveSystemFromUpdateList(snapshotSystem);
-
 		simulationGroup.UpdateCallback=SimulationTickController;
 
-		lastSubFrame=0;
+		var initializationGroup=World.GetExistingSystem<InitializationSystemGroup>();
+		var updateWorldTimeSystem = World.GetExistingSystem<UpdateWorldTimeSystem>();
+		initializationGroup.RemoveSystemFromUpdateList(updateWorldTimeSystem);
+
+		inputAccumulatorSystem=World.GetExistingSystem<InputAccumulatorSystem>();
+		snapshotSystem=World.GetExistingSystem<TakeSimulationSnapshotSystem>();
+
 		Enabled=false;
+	}
+
+	protected override void OnStartRunning()
+	{
+		if(!createdInputSingleton)
+		{
+			World.EntityManager.CreateEntity(ComponentType.ReadOnly<InputStateComponent>());
+			createdInputSingleton=true;
+		}
 	}
 	protected bool SimulationTickController(ComponentSystemBase simulationGroup)
 	{
-		double elapsed=UnityEngine.Time.time;
-		double lastFullFrame=snapshotSystem.GetSnapshotElapsedTime();
-		var sinceFullFrame=elapsed-lastFullFrame;
-		if(sinceFullFrame>=FULL_FRAME_INTERVAL)
+		double realTime=UnityEngine.Time.time;
+		double worldTime=World.Time.ElapsedTime;
+		double snapshotTime=snapshotSystem.GetSnapshotElapsedTime();
+		double sinceLastSubFrame=realTime-lastSubFrame;
+
+		if(!snapshotSystem.snapshotTaken){snapshotSystem.TakeSnapshot();}
+
+		if(sinceLastSubFrame>0)
+		{
+			if(slavedToRemoteGovernor)
+			{
+				double sinceLastReceivedServerFrame=realTime-lastReceivedServerFrame;
+				double targetWorldElapsed=snapshotTime+sinceLastReceivedServerFrame+serverFrameLead;
+				double minUserVisibleElapsed=worldTime+sinceLastSubFrame*(1-MAXIMUM_SUBFRAME_DEVIATION_PERCENT);
+				double maxUserVisibleElapsed=worldTime+sinceLastSubFrame*(1+MAXIMUM_SUBFRAME_DEVIATION_PERCENT);
+				userVisibleWorldElapsed+=Math.Min(maxUserVisibleElapsed,Math.Max(minUserVisibleElapsed,targetWorldElapsed))-worldTime;
+			}
+			else
+			{
+				userVisibleWorldElapsed+=sinceLastSubFrame;
+			}
+			lastSubFrame=realTime;
+		}
+
+		double sinceLastFullFrame=userVisibleWorldElapsed-snapshotTime;
+		if(!slavedToRemoteGovernor&&sinceLastFullFrame>=FULL_FRAME_INTERVAL)
 		{
 			snapshotSystem.RestoreSnapshot();
 			snapshotSystem.PrepareSnapshot();
-			lastFullFrame+=FULL_FRAME_INTERVAL;
-			World.PushTime(new TimeData(lastFullFrame,(float)FULL_FRAME_INTERVAL));
-			lastSubFrame=lastFullFrame;
-			UnityEngine.Time.fixedDeltaTime=(float)FULL_FRAME_INTERVAL;
-			return true;
+			return EngageFrame(FULL_FRAME_INTERVAL,true);
 		}
-		else if(lastSubFrame!=elapsed)
-		{
-			var deltaTime=elapsed-lastSubFrame;
-			World.PushTime(new TimeData(elapsed,(float)deltaTime));
-			lastSubFrame=elapsed;
-			UnityEngine.Time.fixedDeltaTime=(float)deltaTime;
-			return true;
-		}
-		return false;
+		double thisSimulationStep=userVisibleWorldElapsed-worldTime;
+		if(thisSimulationStep<=0){return false;}
+		return EngageFrame(thisSimulationStep,false);
 	}
-}
-public class TakeSimulationSnapshotSystem:SystemBase
-{
-	protected SnapshotWorld snapshotWorld;
-	protected bool snapshotPrepared=true;
-
-	public TakeSimulationSnapshotSystem(){snapshotWorld=new SnapshotWorld();}
-
-	protected void ReplaceWorld(World source,World destination)
+	protected bool EngageFrame(double worldDelta,bool trimInputs)
 	{
-		var sourceTime=source.Time;
-		var destTime=destination.Time;
-		if(sourceTime.ElapsedTime!=destTime.ElapsedTime)
-		{
-			destination.EntityManager.CopyAndReplaceEntitiesFrom(source.EntityManager);
-			destination.SetTime(source.Time);
-		}
-	}
-
-	public void PrepareSnapshot(){snapshotPrepared=true;}
-	public void RestoreSnapshot(){ReplaceWorld(snapshotWorld,World);}
-
-	public double GetSnapshotElapsedTime(){return snapshotWorld.Time.ElapsedTime;}
-
-	protected override void OnUpdate()
-	{
-		if(snapshotPrepared)
-		{
-			ReplaceWorld(World,snapshotWorld);
-			snapshotPrepared=false;
-		}
+		TimeData frameTimeData=new TimeData(World.Time.ElapsedTime+worldDelta,(float)worldDelta);
+		World.SetTime(frameTimeData);
+		UnityEngine.Time.fixedDeltaTime = (float)worldDelta;
+		InputStateComponent inputState = default;
+		if(trimInputs){inputState = inputAccumulatorSystem.GetInputsForFrame(frameTimeData,true);}
+		else{inputState = inputAccumulatorSystem.BakeFrameInputs(frameTimeData);}
+		SetSingleton(inputState);
+		return true;
 	}
 }
