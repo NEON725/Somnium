@@ -10,15 +10,12 @@ public class ClientModeDeterminator:ComponentSystem
 
 	protected override void OnUpdate()
 	{
-		isServer=Application.isBatchMode;
-		isClient=!isServer;
+		SetClientMode(!Application.isBatchMode);
 		#if UNITY_EDITOR
-			isServer=true;
+			SetServerMode(true);
+		#else
+			SetServerMode(false);
 		#endif
-		if(!isClient)
-		{
-			World.GetExistingSystem<PresentationSystemGroup>().Enabled=false;
-		}
 		Enabled=false;
 	}
 
