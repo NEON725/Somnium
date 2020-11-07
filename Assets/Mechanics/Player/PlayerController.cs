@@ -4,7 +4,6 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
-[UpdateAfter(typeof(InputPlaybackSystem))]
 public class LocalPlayerController:ComponentSystem
 {
 	public const float LOOK_SPEED=0.5f;
@@ -35,8 +34,9 @@ public class LocalPlayerController:ComponentSystem
 		float3 WORLD_BACKWARD=LocalPlayerController.WORLD_BACKWARD;
 		float3 WORLD_UP=LocalPlayerController.WORLD_UP;
 
-		Entities.ForEach((ref PhysicsVelocity physics,ref LocalPlayer player,ref Translation translation,ref Rotation rotation,ref FrameInputComponent input)=>
+		Entities.ForEach((ref PhysicsVelocity physics,ref LocalPlayer player,ref Translation translation,ref Rotation rotation)=>
 		{
+			InputStateComponent input=GetSingleton<InputStateComponent>();
 			float2 controlLook=input.look*LOOK_SPEED;
 			/*
 			* Note the confusing X/Y usage, because yaw rotates
