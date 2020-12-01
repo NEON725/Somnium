@@ -15,6 +15,13 @@ public struct InputStateComponent:IComponentData
 		jump=input.Player.Jump.triggered;
 	}
 
+	public InputStateComponent(float2 look,float2 move,bool jump)
+	{
+		this.look = look;
+		this.move = move;
+		this.jump = jump;
+	}
+
 	public void ApplyScale(double scale)
 	{
 		ApplyScale(ref look,scale);
@@ -29,10 +36,6 @@ public struct InputStateComponent:IComponentData
 
 	public static InputStateComponent operator+(InputStateComponent a,InputStateComponent b)
 	{
-		InputStateComponent retVal=default;
-		retVal.look=a.look+b.look;
-		retVal.move=a.move+b.move;
-		retVal.jump=a.jump|b.jump;
-		return retVal;
+		return new InputStateComponent(a.look+b.look,a.move+b.move,a.jump|b.jump);
 	}
 }
