@@ -52,18 +52,17 @@ public class FrameGovernor:ComponentSystem
 
 		if(sinceLastSubFrame>0)
 		{
+			double advanceUserVisibleWorldElapsed=sinceLastSubFrame;
 			if(slavedToRemoteGovernor)
 			{
 				double sinceLastReceivedServerFrame=realTime-lastReceivedServerFrame;
 				double targetWorldElapsed=snapshotTime+sinceLastReceivedServerFrame+serverFrameLead;
 				double minUserVisibleElapsed=worldTime+sinceLastSubFrame*(1-MAXIMUM_SUBFRAME_DEVIATION_PERCENT);
 				double maxUserVisibleElapsed=worldTime+sinceLastSubFrame*(1+MAXIMUM_SUBFRAME_DEVIATION_PERCENT);
-				userVisibleWorldElapsed+=Math.Min(maxUserVisibleElapsed,Math.Max(minUserVisibleElapsed,targetWorldElapsed))-worldTime;
+				advanceUserVisibleWorldElapsed=Math.Min(maxUserVisibleElapsed,Math.Max(minUserVisibleElapsed,targetWorldElapsed))-worldTime;
 			}
-			else
-			{
-				userVisibleWorldElapsed+=sinceLastSubFrame;
-			}
+			userVisibleWorldElapsed+=advanceUserVisibleWorldElapsed;
+			inputAccumulatorSystem.BakeFrameInputs(new TimeData(userVisibleWorldElapsed,(float)advanceUserVisibleWorldElapsed));
 			lastSubFrame=realTime;
 		}
 
@@ -84,8 +83,7 @@ public class FrameGovernor:ComponentSystem
 		World.SetTime(frameTimeData);
 		UnityEngine.Time.fixedDeltaTime = (float)worldDelta;
 		InputStateComponent inputState = default;
-		if(trimInputs){inputState = inputAccumulatorSystem.GetInputsForFrame(frameTimeData,true);}
-		else{inputState = inputAccumulatorSystem.BakeFrameInputs(frameTimeData);}
+		inputState = inputAccumulatorSystem.GetInputsForFrame(frameTimeData,trimInputs);
 		SetSingleton(inputState);
 		return true;
 	}

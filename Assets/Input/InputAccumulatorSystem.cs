@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Core;
 using Unity.Entities;
@@ -55,16 +56,16 @@ public class InputAccumulatorSystem:ComponentSystem
 			double snapshotBegin=snapshotEnd-snapshotDelta;
 			double portion=0;
 			bool removeSnapshot=false;
-			if(snapshotBegin>sinceElapsed&&snapshotEnd<=untilElapsed)
+			if(snapshotBegin>=sinceElapsed&&snapshotEnd<=untilElapsed)
 			{
 				portion=1;
 				removeSnapshot=true;
 			}
-			else if(snapshotBegin>sinceElapsed&&snapshotBegin<untilElapsed)
+			else if(snapshotBegin>=sinceElapsed&&snapshotBegin<untilElapsed)
 			{
 				portion=(untilElapsed-snapshotBegin)/snapshotDelta;
 			}
-			else if(snapshotEnd>sinceElapsed&&snapshotEnd<untilElapsed)
+			else if(snapshotEnd>sinceElapsed&&snapshotEnd<=untilElapsed)
 			{
 				portion=(snapshotEnd-sinceElapsed)/snapshotDelta;
 				removeSnapshot=true;
@@ -72,6 +73,10 @@ public class InputAccumulatorSystem:ComponentSystem
 			else if(snapshotBegin<sinceElapsed&&snapshotEnd>untilElapsed)
 			{
 				portion=deltaElapsed/snapshotDelta;
+				removeSnapshot=true;
+			}
+			else if(snapshotEnd<sinceElapsed)
+			{
 				removeSnapshot=true;
 			}
 			if(portion>0)
